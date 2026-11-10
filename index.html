@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="لعبة تفاعلية لتدريب طلاب الصف الثالث الابتدائي على الشبكات وحقائق الضرب وخاصية الإبدال.">
+<title>رحلة الضرب الفضائية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;700;800&family=Tajawal:wght@500;700;800&display=swap">
+<style>
+body{margin:0}
+/* Layout: a star map of lesson-planets; each planet opens one chunky question card at a time */
+:root{
+  --space:#160f45; --space-2:#2b1c7a; --panel:#ffffff; --panel-2:#f2eeff;
+  --ink:#24195f; --muted:#6d64a6;
+  --sun:#ffc93c; --coral:#ff6b6b; --sky:#3ec6ff; --lime:#7ee36b; --pink:#ff7ad9; --violet:#8b6bff; --teal:#2ee6c5; --orange:#ff9f43;
+  --ok:#22b468; --bad:#ff4d5a;
+  --display:'Baloo Bhaijaan 2','Tajawal',system-ui,sans-serif;
+  --body:'Tajawal','Baloo Bhaijaan 2',system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0; color:#fff; font-family:var(--body); font-size:17px; line-height:1.6;
+  background-color:var(--space);
+  background-image:
+    radial-gradient(circle at 30% 40%, #fff 0 1.2px, transparent 2px),
+    radial-gradient(circle at 70% 80%, #ffe9a8 0 1px, transparent 1.8px),
+    radial-gradient(circle at 50% 20%, #b9e9ff 0 1.6px, transparent 2.4px),
+    radial-gradient(ellipse 60% 40% at 85% 10%, rgba(255,122,217,.28), transparent 70%),
+    radial-gradient(ellipse 60% 45% at 10% 90%, rgba(62,198,255,.22), transparent 70%),
+    linear-gradient(180deg, var(--space) 0%, var(--space-2) 100%);
+  background-size:170px 170px, 230px 230px, 310px 310px, 100% 100%, 100% 100%, 100% 100%;
+  background-attachment:fixed;
+}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:4px solid var(--sun);outline-offset:3px}
+.app{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 48px}
+
+/* ---------- shared bits ---------- */
+.chip{display:inline-flex;align-items:center;gap:.4em;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.18);border-radius:999px;padding:.25em .9em;font-family:var(--display);font-weight:800;font-size:1.1rem}
+.chip svg{width:22px;height:22px}
+.icon-btn{width:48px;height:48px;border-radius:50%;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);display:grid;place-items:center;flex:none}
+.icon-btn svg{width:24px;height:24px}
+.icon-btn:hover{background:rgba(255,255,255,.2)}
+
+/* ---------- official header ---------- */
+.official{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-bottom:16px;padding:12px 18px;border-radius:22px;
+  background:rgba(255,255,255,.95);color:var(--ink);box-shadow:0 6px 0 rgba(10,6,40,.45);border-bottom:5px solid var(--teal)}
+.off-lines,.off-meta{display:grid;gap:0;font-weight:800;font-size:.95rem;line-height:1.55}
+.off-meta{justify-items:end;text-align:left;color:var(--muted);font-weight:700}
+.off-school{display:grid;justify-items:center;text-align:center;background:var(--panel-2);border-radius:16px;padding:6px 16px}
+.off-teacher{color:var(--ink);font-weight:800}
+.off-school .off-teacher-sm{display:none;font-size:.85rem;font-weight:700;color:var(--muted)}
+.off-label{font-size:.8rem;font-weight:800;color:var(--violet);letter-spacing:.02em}
+.off-school strong{font-family:var(--display);font-size:1.25rem;line-height:1.3}
+@media (max-width:640px){.official{grid-template-columns:1fr auto;padding:10px 14px}.off-meta{display:none}.off-school .off-teacher-sm{display:block}.off-lines{font-size:.85rem}.off-school strong{font-size:1.05rem}}
+@media (max-width:400px){.official{grid-template-columns:1fr}.off-lines{justify-items:center;text-align:center}.off-school{justify-self:stretch}}
+
+/* ---------- home ---------- */
+.hero{display:grid;gap:10px;padding-block:6px 22px}
+.hero-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.hero-main{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.hero-rocket{width:150px;max-width:40%;animation:fly 3.2s ease-in-out infinite;filter:drop-shadow(0 8px 18px rgba(255,201,60,.35))}
+@keyframes fly{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-12px) rotate(-2deg)}}
+.hero h1{font-family:var(--display);font-weight:800;font-size:clamp(2.1rem,6vw,3.6rem);line-height:1.15;margin:0;text-wrap:balance;
+  background:linear-gradient(90deg,var(--sun),var(--pink) 55%,var(--sky));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{margin:4px 0 0;color:#e5defc;max-width:52ch;font-size:1.05rem}
+.hero-text{flex:1;min-width:0}
+.section-label{font-family:var(--display);font-weight:700;color:var(--sun);font-size:1.15rem;margin:8px 0 12px;letter-spacing:.02em}
+.map{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+@media (max-width:460px){.map{grid-template-columns:1fr 1fr;gap:12px}}
+.planet{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 10px 16px;border-radius:26px;
+  background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.13);text-align:center;transition:transform .2s, background .2s}
+.planet:hover{transform:translateY(-4px);background:rgba(255,255,255,.13)}
+.planet svg.orb{width:118px;height:118px;max-width:100%;animation:bob 4s ease-in-out infinite}
+.planet:nth-child(2n) svg.orb{animation-delay:-1.3s}.planet:nth-child(3n) svg.orb{animation-delay:-2.4s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.planet .tag{font-size:.82rem;font-weight:700;color:#cfc4ff;background:rgba(0,0,0,.22);border-radius:999px;padding:0 .7em}
+.planet .pname{font-family:var(--display);font-weight:800;font-size:1.22rem;line-height:1.3}
+.planet .pdesc{font-size:.88rem;color:#d9d1ff;line-height:1.4;min-height:2.6em}
+.stars{display:flex;gap:4px;justify-content:center}
+.stars svg{width:24px;height:24px}
+
+/* ---------- play ---------- */
+.play{max-width:740px;margin:0 auto}
+.bar{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.bar-mid{flex:1;min-width:0}
+.lvl-name{font-family:var(--display);font-weight:800;font-size:1.2rem;line-height:1.2;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track{position:relative;height:16px;border-radius:999px;background:rgba(255,255,255,.14)}
+.fill{position:absolute;inset-block:0;inset-inline-start:0;width:0;border-radius:999px;background:linear-gradient(90deg,var(--pink),var(--sun));transition:width .4s}
+.mini-rocket{position:absolute;top:50%;inset-inline-start:0;width:46px;transform:translate(50%,-50%);transition:inset-inline-start .4s}
+.mini-rocket svg{width:46px;height:auto;display:block}
+.timer{display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--display);font-weight:800;font-size:1.4rem;margin:-4px 0 10px;color:var(--sun)}
+.timer.low{color:var(--coral);animation:pulse .6s infinite}
+@keyframes pulse{50%{transform:scale(1.12)}}
+
+.card{background:var(--panel);color:var(--ink);border-radius:30px;padding:20px 20px 22px;box-shadow:0 10px 0 rgba(10,6,40,.55),0 24px 50px rgba(0,0,0,.35);display:grid;gap:14px}
+.qnum{display:flex;justify-content:space-between;align-items:center;font-weight:800;color:var(--muted);font-size:.95rem}
+.qnum .kind{background:var(--panel-2);color:var(--violet);border-radius:999px;padding:0 .8em}
+.prompt{font-family:var(--display);font-weight:700;font-size:1.35rem;line-height:1.6;text-wrap:balance}
+.vis-box{background:var(--panel-2);border-radius:22px;padding:14px;overflow-x:auto}
+.vis{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center}
+.vis .plate{max-width:100%;height:auto;animation:pop .35s both}
+.vis .plate:nth-child(2){animation-delay:.05s}.vis .plate:nth-child(3){animation-delay:.1s}.vis .plate:nth-child(4){animation-delay:.15s}.vis .plate:nth-child(5){animation-delay:.2s}.vis .plate:nth-child(n+6){animation-delay:.25s}
+@keyframes pop{from{transform:scale(.6);opacity:.2}to{transform:scale(1);opacity:1}}
+.vis-cap{text-align:center;font-weight:800;color:var(--muted);margin-top:8px;font-size:.98rem}
+.vis svg.wide{width:100%;height:auto;display:block;margin:0 auto}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.say{background:#fff;border:3px solid var(--sky);border-radius:22px 22px 22px 6px;padding:10px 12px;display:grid;gap:6px;justify-items:center}
+.say:nth-child(2){border-color:var(--pink);border-radius:22px 22px 6px 22px}
+.say b{font-family:var(--display);font-size:1.2rem}
+.hint{justify-self:start;display:inline-flex;align-items:center;gap:.4em;background:#fff6d6;color:#8a5a00;border:2px dashed var(--sun);border-radius:999px;padding:.3em 1em;font-weight:800}
+.hint svg{width:20px;height:20px}
+
+.eq-wrap{display:flex;justify-content:center;padding-block:4px}
+.eq{display:inline-flex;direction:rtl;align-items:center;gap:.32em;font-family:var(--display);font-weight:800;line-height:1.2;font-variant-numeric:tabular-nums}
+.eq.big{font-size:clamp(2.2rem,8vw,3.2rem)}
+.eq .op{font-style:normal;color:var(--coral)}
+.eq .blank{display:inline-grid;place-items:center;min-width:1.5em;height:1.3em;padding:0 .15em;border:3px dashed var(--violet);border-radius:14px;color:var(--violet);background:#f6f3ff}
+.eq .blank.filled{border-style:solid;border-color:var(--sun);background:var(--sun);color:var(--ink);animation:pop .3s}
+.eq.sm{font-size:1.4rem}
+.eq.inl{font-size:1.05em;background:var(--panel-2);border-radius:12px;padding:0 .45em;vertical-align:middle;margin-inline:.15em}
+.eq.opt{font-size:1.35rem}
+
+.options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opt{border:0;border-radius:22px;min-height:76px;padding:10px;font-family:var(--display);font-weight:800;font-size:2rem;color:var(--ink);
+  box-shadow:inset 0 -7px 0 rgba(0,0,0,.16);transition:transform .12s, filter .2s;display:grid;place-items:center;line-height:1.25}
+.opt.txt{font-size:1.15rem;min-height:70px}
+.opt:nth-child(1){background:var(--sun)}.opt:nth-child(2){background:var(--sky)}.opt:nth-child(3){background:var(--lime)}.opt:nth-child(4){background:var(--pink)}
+.opt:hover:not(:disabled){transform:translateY(-3px)}
+.opt:active:not(:disabled){transform:translateY(2px);box-shadow:inset 0 -3px 0 rgba(0,0,0,.16)}
+.opt:disabled{cursor:default;filter:saturate(.35) opacity(.55)}
+.opt.right{background:var(--ok)!important;color:#fff;filter:none;animation:pop .3s}
+.opt.right .eq .op{color:#fff}
+.opt.wrong{background:var(--bad)!important;color:#fff;filter:none;animation:shake .4s}
+.opt.wrong .eq .op{color:#fff}
+@keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+
+.explain{border-radius:22px;padding:14px 16px;display:grid;gap:8px;justify-items:center;text-align:center;font-weight:700}
+.explain.good{background:#e3f9ec;color:#11603a}
+.explain.miss{background:#fff1e6;color:#8a3a12}
+.explain .head{font-family:var(--display);font-weight:800;font-size:1.35rem}
+.explain .tip{font-size:.98rem;color:inherit;opacity:.9}
+.next{justify-self:center;border:0;border-radius:999px;padding:.5em 2em;font-family:var(--display);font-weight:800;font-size:1.3rem;color:#fff;
+  background:linear-gradient(90deg,var(--violet),var(--pink));box-shadow:inset 0 -5px 0 rgba(0,0,0,.2)}
+.next:hover{filter:brightness(1.08)}
+
+/* ---------- result ---------- */
+.result{max-width:560px;margin:30px auto 0;text-align:center}
+.result .card{justify-items:center;padding:28px 20px}
+.big-stars{display:flex;gap:10px;justify-content:center;align-items:flex-end}
+.big-stars svg{width:84px;height:84px}
+.big-stars svg:nth-child(2){width:104px;height:104px}
+.big-stars svg{animation:pop .5s both}.big-stars svg:nth-child(2){animation-delay:.2s}.big-stars svg:nth-child(3){animation-delay:.4s}
+.result h2{font-family:var(--display);font-size:2rem;margin:0;line-height:1.2;text-wrap:balance}
+.result .score{font-size:1.2rem;font-weight:800;color:var(--muted)}
+.res-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.ghost{border:3px solid var(--violet);background:#fff;color:var(--violet);border-radius:999px;padding:.4em 1.6em;font-family:var(--display);font-weight:800;font-size:1.2rem}
+
+#fx{position:fixed;inset:0;pointer-events:none;z-index:50;width:100%;height:100%}
+footer{margin-top:28px;text-align:center;color:#b9addf;font-size:.9rem}
+
+@media (max-width:460px){
+  .prompt{font-size:1.18rem}.opt{font-size:1.7rem;min-height:68px}.opt.txt{font-size:1rem}.eq.opt{font-size:1.15rem}
+  .card{padding:16px 14px 18px;border-radius:24px}.big-stars svg{width:64px;height:64px}.big-stars svg:nth-child(2){width:80px;height:80px}
+  .duo{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app" dir="rtl" lang="ar">
+  <header class="official" aria-label="ترويسة المدرسة">
+    <div class="off-lines">
+      <span>المملكة العربية السعودية</span>
+      <span>وزارة التعليم</span>
+      <span>إدارة تعليم شقراء</span>
+    </div>
+    <div class="off-school">
+      <span class="off-label">المدرسة</span>
+      <strong>الابتدائية الثامنة بشقراء</strong>
+      <span class="off-teacher-sm">الصف الثالث الابتدائي</span>
+      <span class="off-teacher-sm">المعلمة: خلود العتيبي</span>
+    </div>
+    <div class="off-meta">
+      <span>مادة الرياضيات</span>
+      <span>الصف الثالث الابتدائي</span>
+      <span>الفصل الرابع: الضرب (١)</span>
+      <span class="off-teacher">المعلمة: خلود العتيبي</span>
+    </div>
+  </header>
+  <!-- HOME -->
+  <section id="home">
+    <header class="hero">
+      <div class="hero-top">
+        <span class="chip" id="totalStars" aria-live="polite"></span>
+        <button class="icon-btn" id="muteBtn" aria-label="تشغيل الصوت أو إيقافه"></button>
+      </div>
+      <div class="hero-main">
+        <svg class="hero-rocket" viewBox="0 0 160 120" aria-hidden="true">
+          <defs><linearGradient id="hrBody" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d9d2ff"/></linearGradient></defs>
+          <g transform="rotate(-18 80 60)">
+            <path d="M118 60 l26 -9 l-6 9 l6 9z" fill="#ff9f43"><animate attributeName="d" dur=".35s" repeatCount="indefinite" values="M118 60 l26 -9 l-6 9 l6 9z;M118 60 l34 -7 l-8 7 l8 7z;M118 60 l26 -9 l-6 9 l6 9z"/></path>
+            <path d="M118 60 l16 -5 l-3 5 l3 5z" fill="#ffc93c"/>
+            <path d="M20 60 C34 30, 90 28, 118 40 L118 80 C90 92, 34 90, 20 60Z" fill="url(#hrBody)" stroke="#24195f" stroke-width="4"/>
+            <path d="M20 60 C26 48, 36 40, 46 36 L46 84 C36 80, 26 72, 20 60Z" fill="#ff6b6b" stroke="#24195f" stroke-width="4"/>
+            <circle cx="72" cy="60" r="13" fill="#3ec6ff" stroke="#24195f" stroke-width="4"/>
+            <circle cx="67" cy="55" r="4" fill="#fff" opacity=".8"/>
+            <path d="M96 38 L116 14 L120 40Z" fill="#ff7ad9" stroke="#24195f" stroke-width="4" stroke-linejoin="round"/>
+            <path d="M96 82 L116 106 L120 80Z" fill="#ff7ad9" stroke="#24195f" stroke-width="4" stroke-linejoin="round"/>
+          </g>
+        </svg>
+        <div class="hero-text">
+          <h1>رحلة الضرب الفضائية</h1>
+          <p>الفصل الرابع: الضرب (١). زُر كل كوكب، وأجب عن أسئلته، واجمع ثلاث نجوم في كل رحلة.</p>
+        </div>
+      </div>
+    </header>
+    <div class="section-label">اختر كوكبًا لتبدأ</div>
+    <div class="map" id="map"></div>
+    <footer>الأسئلة مبنية على دروس الشبكات، والضرب في ٢ و٤ و٥ و١٠، والضرب في الصفر والواحد، وخاصية الإبدال.</footer>
+  </section>
+
+  <!-- PLAY -->
+  <section id="play" class="play" hidden>
+    <div class="bar">
+      <button class="icon-btn" id="backBtn" aria-label="العودة إلى الخريطة">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <div class="bar-mid">
+        <div class="lvl-name" id="lvlName"></div>
+        <div class="track"><div class="fill" id="fill"></div><div class="mini-rocket" id="miniRocket"></div></div>
+      </div>
+      <span class="chip" id="gemChip"><span id="gemIcon"></span><span id="gemCount">٠</span></span>
+    </div>
+    <div class="timer" id="timer" hidden></div>
+    <article class="card" id="card" aria-live="polite">
+      <div class="qnum"><span id="qnum"></span><span class="kind" id="qkind"></span></div>
+      <div class="prompt" id="prompt"></div>
+      <div class="vis-box" id="visBox" hidden></div>
+      <button class="hint" id="hintBtn" hidden></button>
+      <div class="eq-wrap" id="eqWrap"></div>
+      <div class="options" id="options"></div>
+      <div class="explain" id="explain" hidden></div>
+      <button class="next" id="nextBtn" hidden>السؤال التالي</button>
+    </article>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result" class="result" hidden>
+    <div class="card">
+      <div class="big-stars" id="bigStars"></div>
+      <h2 id="resTitle"></h2>
+      <div class="score" id="resScore"></div>
+      <div class="res-actions">
+        <button class="next" id="againBtn">أعيد الرحلة</button>
+        <button class="ghost" id="mapBtn">إلى خريطة الكواكب</button>
+      </div>
+    </div>
+  </section>
+</div>
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<script>
+(function(){
+/* ================= helpers ================= */
+const AR='٠١٢٣٤٥٦٧٨٩';
+const ar=n=>String(n).replace(/\d/g,d=>AR[d]);
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const $=id=>document.getElementById(id);
+const PAL=['#ff6b6b','#3ec6ff','#7ee36b','#ffc93c','#ff7ad9','#8b6bff','#ff9f43','#2ee6c5'];
+const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function eq(tokens,cls='big'){
+  return `<span class="eq ${cls}" dir="rtl">`+tokens.map(t=>{
+    if(t==='×'||t==='+'||t==='=') return `<i class="op">${t}</i>`;
+    if(t==='?') return `<span class="blank">?</span>`;
+    return `<b>${typeof t==='number'?ar(t):t}</b>`;
+  }).join('')+`</span>`;
+}
+const inl=t=>eq(t,'inl');
+
+function starSVG(on,size){
+  const fill=on?'#ffc93c':'none', stroke=on?'#e89a00':'rgba(255,255,255,.45)';
+  return `<svg viewBox="0 0 24 24" width="${size||24}" height="${size||24}" aria-hidden="true"><polygon points="${starPts(12,12.6,11,4.8)}" fill="${fill}" stroke="${stroke}" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
+}
+function bigStar(on){
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="${starPts(12,12.6,11,4.8)}" fill="${on?'#ffc93c':'#e9e4ff'}" stroke="${on?'#e89a00':'#cfc6f5'}" stroke-width="1.4" stroke-linejoin="round"/>${on?'<circle cx="9" cy="9.5" r="1.6" fill="#fff" opacity=".8"/>':''}</svg>`;
+}
+function starPts(cx,cy,R,r){const p=[];for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r:R;p.push((cx+rr*Math.cos(a)).toFixed(1)+','+(cy+rr*Math.sin(a)).toFixed(1))}return p.join(' ')}
+const GEM='<svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,2 22,9 12,22 2,9" fill="#2ee6c5" stroke="#0b8f7a" stroke-width="1.6" stroke-linejoin="round"/><polygon points="12,2 16,9 12,22 8,9" fill="#a6fff0" opacity=".7"/></svg>';
+const ROCKET='<svg viewBox="0 0 64 32" aria-hidden="true"><path d="M50 16 l12 -5 l-3 5 l3 5z" fill="#ffc93c"/><path d="M4 16 C10 5, 34 4, 50 9 L50 23 C34 28, 10 27, 4 16Z" fill="#fff" stroke="#24195f" stroke-width="2.5"/><path d="M4 16 C7 11, 11 8, 15 7 L15 25 C11 24, 7 21, 4 16Z" fill="#ff6b6b" stroke="#24195f" stroke-width="2.5"/><circle cx="28" cy="16" r="5" fill="#3ec6ff" stroke="#24195f" stroke-width="2.5"/><path d="M40 8 L50 1 L50 10Z" fill="#ff7ad9" stroke="#24195f" stroke-width="2" stroke-linejoin="round"/><path d="M40 24 L50 31 L50 22Z" fill="#ff7ad9" stroke="#24195f" stroke-width="2" stroke-linejoin="round"/></svg>';
+const SPEAKER_ON='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#fff"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg>';
+const SPEAKER_OFF='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#fff"/><path d="M17 9l5 6M22 9l-5 6"/></svg>';
+const BULB='<svg viewBox="0 0 24 24" fill="none" stroke="#8a5a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z" fill="#ffc93c"/></svg>';
+
+/* ================= visuals ================= */
+function shape(type,x,y,s,c){
+  const h=s/2, st='stroke="#24195f" stroke-width="1.6" stroke-linejoin="round"';
+  switch(type){
+    case 'gem':return `<polygon points="${x},${y-h} ${x+h},${y-h/4} ${x},${y+h} ${x-h},${y-h/4}" fill="${c}" ${st}/>`;
+    case 'star':return `<polygon points="${starPts(x,y+1,h+1,h*.45)}" fill="${c}" ${st}/>`;
+    case 'candy':return `<rect x="${x-h+1}" y="${y-h+1}" width="${s-2}" height="${s-2}" rx="5" fill="${c}" ${st}/><circle cx="${x}" cy="${y}" r="${h/3}" fill="#fff" opacity=".75"/>`;
+    case 'hex':{const p=[];for(let i=0;i<6;i++){const a=Math.PI/6+i*Math.PI/3;p.push((x+h*Math.cos(a)).toFixed(1)+','+(y+h*Math.sin(a)).toFixed(1))}return `<polygon points="${p.join(' ')}" fill="${c}" ${st}/>`}
+    default:return `<circle cx="${x}" cy="${y}" r="${h}" fill="${c}" ${st}/><circle cx="${x-h/3}" cy="${y-h/3}" r="${h/4}" fill="#fff" opacity=".8"/>`;
+  }
+}
+function groupWord(n){return n===1?'مجموعة واحدة':n===2?'مجموعتان':`${ar(n)} مجموعات`}
+function groupsVis(n,k,type){
+  type=type||pick(['gem','star','ball','candy','hex']);
+  const cols=k<=2?Math.max(k,1):k<=4?2:k<=6?3:5, rows=Math.max(1,Math.ceil(k/cols)), cell=26, pad=10;
+  const w=cols*cell+pad*2, h=rows*cell+pad*2;
+  let out='';
+  for(let g=0;g<n;g++){
+    const c=PAL[g%PAL.length]; let items='';
+    for(let i=0;i<k;i++){items+=shape(type,pad+(i%cols)*cell+cell/2,pad+Math.floor(i/cols)*cell+cell/2,19,c)}
+    out+=`<svg class="plate" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true"><rect x="2" y="2" width="${w-4}" height="${h-4}" rx="14" fill="#fff" stroke="${c}" stroke-width="3" ${k===0?'stroke-dasharray="6 5"':''}/>${items}</svg>`;
+  }
+  const cap=k===0?`${groupWord(n)}، كلها فارغة`:`${groupWord(n)}، في كل منها ${ar(k)}`;
+  return `<div class="vis">${out}</div><div class="vis-cap">${cap}</div>`;
+}
+function arrayVis(r,c){
+  const cell=34, pad=10, top=30, side=30, w=c*cell+pad*2+side, h=r*cell+top+pad;
+  let s=`<svg class="plate" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="شبكة من ${ar(r)} صفوف في كل صف ${ar(c)}">`;
+  const x0=pad, x1=pad+c*cell, yb=top+r*cell;
+  s+=`<path d="M${x0} ${top-6} v-6 H${x1} v6" fill="none" stroke="#8b6bff" stroke-width="2.5"/><text x="${(x0+x1)/2}" y="${top-16}" text-anchor="middle" font-family="Baloo Bhaijaan 2, sans-serif" font-weight="800" font-size="17" fill="#24195f">${ar(c)}</text>`;
+  s+=`<path d="M${x1+6} ${top} h6 V${yb} h-6" fill="none" stroke="#8b6bff" stroke-width="2.5"/><text x="${x1+22}" y="${(top+yb)/2+6}" text-anchor="middle" font-family="Baloo Bhaijaan 2, sans-serif" font-weight="800" font-size="17" fill="#24195f">${ar(r)}</text>`;
+  for(let i=0;i<r;i++)for(let j=0;j<c;j++){s+=shape('ball',x0+j*cell+cell/2,top+i*cell+cell/2,26,PAL[i%PAL.length])}
+  return `<div class="vis">${s}</svg></div><div class="vis-cap">${r===2?'صفّان':ar(r)+' صفوف'}، في كل صف ${ar(c)}</div>`;
+}
+function lineVis(step,jumps){
+  const unit=70, L=30, W=jumps*unit+L*2, H=112, y=78, id='ah'+Math.random().toString(36).slice(2,7);
+  let s=`<svg class="wide" viewBox="0 0 ${W} ${H}" style="max-width:${W}px" role="img" aria-label="خط أعداد بقفزات مقدار كل منها ${ar(step)}"><defs><marker id="${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#ff6b6b"/></marker></defs>`;
+  s+=`<line x1="8" y1="${y}" x2="${W-8}" y2="${y}" stroke="#ff9f43" stroke-width="5" stroke-linecap="round"/>`;
+  for(let i=0;i<=jumps;i++){
+    const x=L+i*unit;
+    s+=`<line x1="${x}" y1="${y-9}" x2="${x}" y2="${y+9}" stroke="#24195f" stroke-width="3"/><circle cx="${x}" cy="${y}" r="5" fill="#24195f"/>`;
+    s+=`<text x="${x}" y="${y+30}" text-anchor="middle" font-family="Baloo Bhaijaan 2, sans-serif" font-weight="800" font-size="19" fill="${i===jumps?'#8b6bff':'#24195f'}">${i===jumps?'؟':ar(i*step)}</text>`;
+    if(i<jumps) s+=`<path d="M${x+4} ${y-8} Q${x+unit/2} ${y-62} ${x+unit-6} ${y-10}" fill="none" stroke="#ff6b6b" stroke-width="3.5" marker-end="url(#${id})"/><text x="${x+unit/2}" y="${y-42}" text-anchor="middle" font-family="Baloo Bhaijaan 2, sans-serif" font-weight="800" font-size="14" fill="#ff6b6b">+${ar(step)}</text>`;
+  }
+  return `<div class="vis">${s}</svg></div><div class="vis-cap">${ar(jumps)} قفزات متساوية، كل قفزة ${ar(step)}</div>`;
+}
+
+/* ================= answers & explanations ================= */
+function numOpts(ans,extra=[]){
+  const out=[],seen=new Set([ans]);
+  const add=v=>{if(Number.isInteger(v)&&v>=0&&!seen.has(v)&&out.length<3){seen.add(v);out.push(v)}};
+  shuffle(extra).forEach(add);
+  shuffle([ans+1,ans-1,ans+2,ans-2,ans+10,ans-10,ans+3,ans+5]).forEach(add);
+  let z=ans+4;while(out.length<3)add(z++);
+  return shuffle([ans,...out]).map(v=>({label:ar(v),value:String(v)}));
+}
+function sentOpts(correct,wrongs){
+  const seen=new Set([correct.join(' ')]),out=[];
+  shuffle(wrongs).forEach(w=>{const k=w.join(' ');if(!seen.has(k)&&out.length<3){seen.add(k);out.push(w)}});
+  return shuffle([correct,...out]).map(t=>({label:eq(t,'opt'),value:t.join(' '),txt:true}));
+}
+const TIPS={0:'أي عدد × صفر = صفر.',1:'أي عدد × ١ = العدد نفسه.',5:'رقم الآحاد في نواتج الضرب في ٥ يكون صفرًا أو خمسة.',10:'رقم الآحاد في نواتج الضرب في ١٠ هو الصفر.'};
+function explainMul(x,y){
+  const p=x*y; let h='';
+  if(x>=2&&x<=6&&y>0){const t=[];for(let i=0;i<x;i++){if(i)t.push('+');t.push(y)}t.push('=',p);h+=`<div>${groupWord(x)}، في كل منها ${ar(y)}:</div>`+eq(t,'sm')}
+  else h+=eq([x,'×',y,'=',p],'sm');
+  const tip=TIPS[x]||TIPS[y];
+  if(tip)h+=`<div class="tip">${tip}</div>`;
+  return h;
+}
+const SWAP_TIP='<div class="tip">خاصية الإبدال: تغيير ترتيب العددين المضروبين لا يغيّر ناتج الضرب.</div>';
+
+/* ================= question builders ================= */
+function factQ(a,k,{prompt,kind}={}){
+  const flip=Math.random()<.4, x=flip?k:a, y=flip?a:k, p=a*k;
+  return {kind:kind||'حقائق الضرب',prompt:prompt||'أجد ناتج الضرب:',eq:eq([x,'×',y,'=','?']),
+    hint:(x>=1&&x<=8&&y>=1&&p<=50)?groupsVis(x,y):null,
+    answer:String(p),options:numOpts(p,[(a+1)*k,Math.max(0,(a-1)*k),a+k,p+k,p-k]),explain:explainMul(x,y)};
+}
+function visualQ(a,k){
+  const p=a*k;
+  return {kind:'أعدّ وأضرب',prompt:'كم قطعة في المجموعات كلها؟',vis:groupsVis(a,k),eq:eq([a,'×',k,'=','?']),
+    answer:String(p),options:numOpts(p,[(a+1)*k,(a-1)*k,a+k,p+1]),explain:explainMul(a,k)};
+}
+function missingQ(a,k){
+  const p=a*k, first=Math.random()<.5;
+  return {kind:'العدد المفقود',prompt:'أكتب العدد المناسب في المربع:',eq:eq(first?['?','×',k,'=',p]:[k,'×','?','=',p]),
+    answer:String(a),options:numOpts(a,[a+1,a-1,k,a+2]),explain:`<div>لأن</div>`+eq(first?[a,'×',k,'=',p]:[k,'×',a,'=',p],'sm')};
+}
+function lineQ(k,j){
+  return {kind:'العدّ القفزي',prompt:`أعدُّ ${ar(j)} قفزات متساوية على خط الأعداد، في كل قفزة ${ar(k)}. أين أصل؟`,vis:lineVis(k,j),eq:eq([j,'×',k,'=','?']),
+    answer:String(j*k),options:numOpts(j*k,[(j+1)*k,(j-1)*k,j+k,j*k+1]),
+    explain:`<div>أقرأ: ${Array.from({length:j},(_,i)=>ar((i+1)*k)).join('، ')}</div>`+eq([j,'×',k,'=',j*k],'sm')};
+}
+function swapResultQ(a,b){
+  const p=a*b;
+  return {kind:'خاصية الإبدال',prompt:`إذا كان ${inl([a,'×',b,'=',p])} فما ناتج:`,eq:eq([b,'×',a,'=','?']),
+    answer:String(p),options:numOpts(p,[p+a,p-b,a+b,p+1]),explain:eq([b,'×',a,'=',p],'sm')+SWAP_TIP};
+}
+function swapBlankQ(a,b){
+  const p=a*b;
+  return {kind:'خاصية الإبدال',prompt:`أستعمل خاصية الإبدال: ${inl([a,'×',b,'=',p])}، إذن:`,eq:eq([b,'×','?','=',p]),
+    answer:String(a),options:numOpts(a,[b,a+1,a-1,p]),explain:eq([b,'×',a,'=',p],'sm')+SWAP_TIP};
+}
+
+/* ----- word problems (objects only) ----- */
+const WORDS={
+  2:[A=>`لكل درّاجة عجلتان. كم عجلة لـ ${A} درّاجات؟`,A=>`في كل علبة قلمان. كم قلمًا في ${A} علب؟`,A=>`يقطع محمد بدرّاجته كيلومترين كل يوم. كم كيلومترًا يقطع في ${A} أيام؟`,A=>`في كل صحن كعكتان. كم كعكة في ${A} صحون؟`],
+  4:[A=>`للسيارة الواحدة ٤ عجلات. كم عجلة لـ ${A} سيارات؟`,A=>`للطاولة الواحدة ٤ أرجل. كم رجلًا لـ ${A} طاولات؟`,A=>`يضع عبدالله ٤ أقلام في كل علبة. كم قلمًا في ${A} علب؟`,A=>`في الكتاب الواحد ٤ فصول. كم فصلًا في ${A} كتب؟`],
+  5:[A=>`مع أحمد ${A} ورقات نقدية من فئة ٥ ريالات. كم ريالًا معه؟`,A=>`في الحقل ${A} صفوف من البطيخ، في كل صف ٥ حبات. كم حبة بطيخ في الحقل؟`,A=>`في كل حافظة طعام ٥ وجبات. كم وجبة في ${A} حافظات؟`],
+  10:[A=>`في كل رزمة ١٠ دفاتر. كم دفترًا في ${A} رزم؟`,A=>`مع خالد ${A} ورقات نقدية من فئة ١٠ ريالات. كم ريالًا معه؟`,A=>`في مسرح المدرسة ${A} صفوف، في كل صف ١٠ مقاعد. كم مقعدًا في المسرح؟`]
+};
+function wordQ(k,used){
+  const a=rnd(3,k===10?9:9), list=WORDS[k].filter((_,i)=>!used.has(k+'-'+i));
+  const idx=WORDS[k].indexOf(pick(list.length?list:WORDS[k]));used.add(k+'-'+idx);
+  const p=a*k;
+  return {kind:'مسألة من واقع الحياة',prompt:WORDS[k][idx](ar(a)),eq:eq([a,'×',k,'=','?']),hint:p<=50?groupsVis(a,k):null,
+    answer:String(p),options:numOpts(p,[(a+1)*k,(a-1)*k,a+k,p+k]),explain:explainMul(a,k)};
+}
+
+/* ================= level generators ================= */
+function genFactor(k){
+  const pool=shuffle([2,3,4,5,6,7,8,9,10]);const next=()=>pool.length?pool.pop():rnd(2,10);
+  const used=new Set();
+  const extra={2:['line','fact'],4:['double','fact'],5:['line','pattern'],10:['line','pattern']}[k];
+  const types=['visual',...shuffle(['fact','word','missing','swap','word','fact',...extra]).slice(0,7)];
+  return types.map(t=>{
+    switch(t){
+      case 'visual':return visualQ(rnd(2,k>=5?4:6),k);
+      case 'fact':return factQ(next(),k);
+      case 'word':return wordQ(k,used);
+      case 'missing':return missingQ(next(),k);
+      case 'line':return lineQ(k,rnd(3,k===10?5:6));
+      case 'swap':return swapResultQ(next(),k);
+      case 'double':{const a=rnd(3,9),p2=a*2;return {kind:'أستعمل ما أعرفه',prompt:`أعرف أن ${inl([a,'×',2,'=',p2])}، والعدد ٤ ضعف العدد ٢. فما ناتج:`,eq:eq([a,'×',4,'=','?']),
+        answer:String(a*4),options:numOpts(a*4,[p2,p2+2,a*4+4,a+4]),explain:`<div>ناتج الضرب في ٤ ضعف ناتج الضرب في ٢:</div>`+eq([p2,'+',p2,'=',a*4],'sm')}}
+      case 'pattern':{
+        if(k===5){const c=5*rnd(3,9);const w=shuffle([c+2,c+3,c-1,c+4,c-2,c+1]).filter(v=>v%5).slice(0,3);
+          return {kind:'أبحث عن نمط',prompt:'أيُّ هذه الأعداد يمكن أن يكون ناتج ضرب عدد في ٥؟',eq:'',answer:String(c),
+            options:shuffle([c,...w]).map(v=>({label:ar(v),value:String(v)})),explain:`<div>${ar(c)} = ${ar(c/5)} × ٥</div><div class="tip">${TIPS[5]}</div>`}}
+        const c=10*rnd(2,9);const w=shuffle([c+5,c+2,c-5,c+4,c-3]).slice(0,3);
+        return {kind:'أبحث عن نمط',prompt:'أيُّ هذه الأعداد ناتج ضرب عدد في ١٠؟',eq:'',answer:String(c),
+          options:shuffle([c,...w]).map(v=>({label:ar(v),value:String(v)})),explain:`<div>${ar(c)} = ${ar(c/10)} × ١٠</div><div class="tip">${TIPS[10]}</div>`};
+      }
+    }
+  });
+}
+function genArrays(){
+  const types=['count',...shuffle(['sentence','sentence','count','swapArr','sentence','word','word'])];
+  return types.map(t=>{
+    const r=rnd(2,5),c=rnd(2,6),p=r*c;
+    switch(t){
+      case 'count':return {kind:'الشبكات',prompt:'كم قطعة في الشبكة؟',vis:arrayVis(r,c),eq:eq([r,'×',c,'=','?']),
+        answer:String(p),options:numOpts(p,[r+c,p+c,p-r,(r+1)*c]),explain:explainMul(r,c)};
+      case 'sentence':return {kind:'الشبكات',prompt:'أيُّ جملة ضرب تعبّر عن الشبكة؟',vis:arrayVis(r,c),eq:'',
+        answer:[r,'×',c,'=',p].join(' '),options:sentOpts([r,'×',c,'=',p],[[r,'+',c,'=',r+c],[r,'×',c,'=',r+c],[r,'×',c+1,'=',r*(c+1)],[r,'×',c,'=',p+r],[r+1,'×',c,'=',(r+1)*c]]),
+        explain:`<div>${r===2?'صفّان':ar(r)+' صفوف'}، في كل صف ${ar(c)} قطع:</div>`+eq([r,'×',c,'=',p],'sm')};
+      case 'swapArr':{const rr=r===c?r+1:r,pp=rr*c;return {kind:'الشبكات والإبدال',prompt:`هذه الشبكة تمثّل ${inl([rr,'×',c,'=',pp])}. لو أدرناها، أيُّ جملة تمثّلها أيضًا؟`,vis:arrayVis(rr,c),eq:'',
+        answer:[c,'×',rr,'=',pp].join(' '),options:sentOpts([c,'×',rr,'=',pp],[[c,'+',rr,'=',c+rr],[c,'×',rr,'=',pp+1],[c,'×',c,'=',c*c],[rr,'×',rr,'=',rr*rr]]),explain:eq([c,'×',rr,'=',pp],'sm')+SWAP_TIP}}
+      case 'word':{const R=rnd(3,5),C=rnd(3,6),P=R*C;const tpl=pick([
+        `رتّبت ليلى أكواب العصير على الطاولة في ${ar(R)} صفوف، في كل صف ${ar(C)} أكواب. كم كوبًا على الطاولة؟`,
+        `في ألبوم سعاد صفحة فيها ${ar(R)} صفوف من الصور، في كل صف ${ar(C)} صور. كم صورة في الصفحة؟`,
+        `زرع مزارع ${ar(R)} صفوف من الشتلات، في كل صف ${ar(C)} شتلات. كم شتلة زرع؟`]);
+        return {kind:'مسألة من واقع الحياة',prompt:tpl,vis:arrayVis(R,C),eq:eq([R,'×',C,'=','?']),answer:String(P),options:numOpts(P,[R+C,P+C,P-R]),explain:explainMul(R,C)}}
+    }
+  });
+}
+function genZeroOne(){
+  const types=['vis1',...shuffle(['vis0','fact0','fact1','missing','prop','word','big','fact0'])].slice(0,8);
+  return types.map(t=>{
+    const a=rnd(2,10);
+    switch(t){
+      case 'vis1':{const n=rnd(2,7);return {kind:'الضرب في ١',prompt:'في كل مجموعة قطعة واحدة. كم قطعة في المجموعات كلها؟',vis:groupsVis(n,1),eq:eq([n,'×',1,'=','?']),answer:String(n),options:numOpts(n,[1,n+1,0,n*2]),explain:explainMul(n,1)}}
+      case 'vis0':{const n=rnd(2,5);return {kind:'الضرب في الصفر',prompt:'المجموعات كلها فارغة! كم قطعة فيها؟',vis:groupsVis(n,0),eq:eq([n,'×',0,'=','?']),answer:'0',options:numOpts(0,[n,1,10]),explain:eq([n,'×',0,'=',0],'sm')+`<div class="tip">${TIPS[0]}</div>`}}
+      case 'fact0':{const f=Math.random()<.5;return {kind:'الضرب في الصفر',prompt:'أجد ناتج الضرب:',eq:eq(f?[0,'×',a,'=','?']:[a,'×',0,'=','?']),answer:'0',options:numOpts(0,[a,1,10]),explain:eq(f?[0,'×',a,'=',0]:[a,'×',0,'=',0],'sm')+`<div class="tip">${TIPS[0]}</div>`}}
+      case 'fact1':{const f=Math.random()<.5;return {kind:'الضرب في ١',prompt:'أجد ناتج الضرب:',eq:eq(f?[1,'×',a,'=','?']:[a,'×',1,'=','?']),answer:String(a),options:numOpts(a,[1,a+1,0,a-1]),explain:eq(f?[1,'×',a,'=',a]:[a,'×',1,'=',a],'sm')+`<div class="tip">${TIPS[1]}</div>`}}
+      case 'missing':{const one=Math.random()<.5;return one
+        ?{kind:'العدد المفقود',prompt:'أكتب العدد المناسب في المربع:',eq:eq([a,'×','?','=',a]),answer:'1',options:numOpts(1,[0,a,10]),explain:eq([a,'×',1,'=',a],'sm')+`<div class="tip">${TIPS[1]}</div>`}
+        :{kind:'العدد المفقود',prompt:'أكتب العدد المناسب في المربع:',eq:eq(['?','×',a,'=',0]),answer:'0',options:numOpts(0,[1,a,10]),explain:eq([0,'×',a,'=',0],'sm')+`<div class="tip">${TIPS[0]}</div>`}}
+      case 'prop':{const v=pick([[925,925,1],[3859,3859,1],[3859,0,0],[512,0,0]]);return {kind:'خاصية العنصر المحايد',
+        prompt:`ما العدد الذي إذا ضربته في ${ar(v[0])} كان الناتج ${v[1]===0?'صفرًا':ar(v[1])}؟`,eq:'',answer:String(v[2]),
+        options:shuffle([0,1,2,10]).map(x=>({label:ar(x),value:String(x)})),explain:eq([v[0],'×',v[2],'=',v[1]],'sm')+`<div class="tip">${TIPS[v[2]]}</div>`}}
+      case 'word':{const m=rnd(3,9),w=pick([
+        [`وجد قبطان ${ar(m)} صناديق فارغة من الجواهر. كم جوهرة في الصناديق؟`,0],
+        [`زرعت ليلى نبتة واحدة في كل حوض من ${ar(m)} أحواض. كم نبتة زرعت؟`,m],
+        [`في الفصل ${ar(m)} طاولات، على كل طاولة كتاب واحد. كم كتابًا على الطاولات؟`,m]]);
+        const ans=w[1];return {kind:'مسألة من واقع الحياة',prompt:w[0],eq:'',answer:String(ans),options:numOpts(ans,ans?[1,ans+1,0]:[1,3,10]),
+          explain:`<div class="tip">${ans?TIPS[1]:TIPS[0]}</div>`}}
+      case 'big':{const n=pick([684,139,27,100,925,250]),z=Math.random()<.5,ans=z?0:n;return {kind:'تحدٍّ',prompt:'أجد ناتج الضرب بسرعة:',eq:eq([n,'×',z?0:1,'=','?']),
+        answer:String(ans),options:numOpts(ans,z?[n,1,10]:[n+1,n-1,0,1]),explain:`<div class="tip">${z?TIPS[0]:TIPS[1]}</div>`}}
+    }
+  });
+}
+function genSwap(){
+  const types=['result',...shuffle(['blank','blank','arr','result','prop','error','blank'])];
+  return types.map(t=>{
+    let a=rnd(2,10),b=rnd(2,10);if(a===b)b=a===10?9:a+1;const p=a*b;
+    switch(t){
+      case 'result':return swapResultQ(a,b);
+      case 'blank':return swapBlankQ(a,b);
+      case 'arr':{const r=rnd(2,5),c=r+rnd(1,2),pp=r*c;return {kind:'الشبكات والإبدال',prompt:`هذه الشبكة تمثّل ${inl([r,'×',c,'=',pp])}. لو أدرناها، أيُّ جملة تمثّلها أيضًا؟`,vis:arrayVis(r,c),eq:'',
+        answer:[c,'×',r,'=',pp].join(' '),options:sentOpts([c,'×',r,'=',pp],[[c,'+',r,'=',c+r],[c,'×',r,'=',pp+1],[c,'×',c,'=',c*c],[r,'×',r,'=',r*r]]),explain:eq([c,'×',r,'=',pp],'sm')+SWAP_TIP}}
+      case 'prop':{const o=['تغيير ترتيب العددين لا يغيّر الناتج','تغيير ترتيب العددين يغيّر الناتج','الضرب في الصفر يعطي صفرًا','الضرب في ١ يعطي العدد نفسه'];
+        return {kind:'مفهوم أساسي',prompt:'خاصية الإبدال لعملية الضرب تعني أن:',eq:'',answer:'0',options:shuffle(o.map((x,i)=>({label:x,value:String(i),txt:true}))),
+          explain:eq([4,'×',3,'=',12],'sm')+eq([3,'×',4,'=',12],'sm')+SWAP_TIP}}
+      case 'error':{const x=rnd(2,5),y=x+rnd(1,3),q=x*y;const good=Math.random()<.5?'علي':'سالم',bad=good==='علي'?'سالم':'علي';
+        const add=[];for(let i=0;i<x;i++){if(i)add.push('+');add.push(y)}add.push('=',q);
+        const card=(n,lines)=>`<div class="say"><b>${n}</b>${lines.map(l=>eq(l,'sm')).join('')}</div>`;
+        const cards={[good]:card(good,[[x,'×',y,'=',q],[y,'×',x,'=',q]]),[bad]:card(bad,[[x,'×',y,'=',q],add])};
+        return {kind:'أكتشف الخطأ',prompt:`استعمل علي وسالم الأعداد ${ar(x)} و${ar(y)} و${ar(q)} لتوضيح خاصية الإبدال. مَن جملتاه توضّحان الخاصية؟`,
+          vis:`<div class="duo">${cards['علي']}${cards['سالم']}</div>`,eq:'',answer:good,options:[{label:'علي',value:'علي',txt:true},{label:'سالم',value:'سالم',txt:true}],
+          explain:`<div>${good} غيّر ترتيب العددين في الضرب فبقي الناتج ${ar(q)}، أما ${bad} فاستعمل الجمع المتكرر.</div>`}}
+    }
+  });
+}
+function raceQ(){
+  const r=Math.random();
+  if(r<.15){const k=pick([2,4,5,10]);return missingQ(rnd(1,10),k)}
+  if(r<.28)return swapResultQ(rnd(2,10),pick([2,4,5,10]));
+  const k=pick([0,1,2,2,4,4,5,5,10,10]),a=rnd(0,10);const q=factQ(a,k);q.hint=null;
+  if(k===0||a===0)q.options=numOpts(0,[a,k,1,10]);
+  return q;
+}
+
+/* ================= levels ================= */
+const LEVELS=[
+  {id:'arrays',name:'كوكب الشبكات',lesson:'الدرس ٤-١',desc:'صفوف وأعمدة متساوية',c:['#fff1a6','#ff9f1c'],label:'grid',gen:genArrays},
+  {id:'x2',name:'كوكب الاثنين',lesson:'الدرس ٤-٢',desc:'الضرب في ٢',c:['#b8f6ff','#1f9dff'],label:'٢',gen:()=>genFactor(2)},
+  {id:'x4',name:'كوكب الأربعة',lesson:'الدرس ٤-٣',desc:'الضرب في ٤',c:['#ffc4ea','#ff3f9c'],label:'٤',gen:()=>genFactor(4)},
+  {id:'x5',name:'كوكب الخمسة',lesson:'الدرس ٤-٥',desc:'الضرب في ٥ وأنماطه',c:['#d4ffb0','#22b448'],label:'٥',gen:()=>genFactor(5)},
+  {id:'x10',name:'كوكب العشرة',lesson:'الدرس ٤-٦',desc:'الضرب في ١٠ وأنماطه',c:['#e1d4ff','#7246ff'],label:'١٠',gen:()=>genFactor(10)},
+  {id:'x01',name:'كوكب الصفر والواحد',lesson:'الدرس ٤-٨',desc:'العنصر المحايد والضرب في الصفر',c:['#ffd6bd','#ff5e2e'],label:'٠ ١',gen:genZeroOne},
+  {id:'swap',name:'كوكب الإبدال',lesson:'الدرس ٤-١',desc:'تغيير الترتيب لا يغيّر الناتج',c:['#b6fff3','#0fb2a0'],label:'⇆',gen:genSwap},
+  {id:'race',name:'سباق النجوم',lesson:'مراجعة الفصل',desc:'أجب عن أكبر عدد في ٦٠ ثانية',c:['#fff6b0','#ffb200'],label:'star',race:true}
+];
+function planetSVG(L,i){
+  const g='pg'+i, [c1,c2]=L.c;
+  let mid;
+  if(L.label==='grid'){mid='';for(let r=0;r<3;r++)for(let c=0;c<3;c++)mid+=`<circle cx="${48+c*12}" cy="${48+r*12}" r="4.5" fill="#fff"/>`}
+  else if(L.label==='star'){mid=`<polygon points="${starPts(60,61,22,9.5)}" fill="#fff" stroke="#e08a00" stroke-width="2"/>`}
+  else mid=`<text x="60" y="${L.label==='⇆'?72:75}" text-anchor="middle" font-family="Baloo Bhaijaan 2, sans-serif" font-weight="800" font-size="${L.label.length>1?30:40}" fill="#fff" stroke="rgba(0,0,0,.18)" stroke-width="1">${L.label}</text>`;
+  return `<svg class="orb" viewBox="0 0 120 120" aria-hidden="true"><defs><radialGradient id="${g}" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></radialGradient></defs>
+    <g transform="rotate(-16 60 60)"><ellipse cx="60" cy="60" rx="57" ry="14" fill="none" stroke="${c1}" stroke-width="5" opacity=".55"/></g>
+    <circle cx="60" cy="60" r="38" fill="url(#${g})"/>
+    <circle cx="44" cy="80" r="6" fill="#fff" opacity=".18"/><circle cx="80" cy="44" r="4" fill="#fff" opacity=".2"/><circle cx="82" cy="78" r="3" fill="#000" opacity=".08"/>
+    ${mid}
+    <g transform="rotate(-16 60 60)"><path d="M3 60 A57 14 0 0 0 117 60" fill="none" stroke="${c1}" stroke-width="5"/></g></svg>`;
+}
+
+/* ================= storage & sound ================= */
+const KEY='mult-space-v1';let store={best:{},mute:false};
+try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&typeof s==='object')store=Object.assign(store,s)}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
+let actx=null;
+function tone(f,t0,d,type,vol){const o=actx.createOscillator(),g=actx.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0.0001,t0);g.gain.linearRampToValueAtTime(vol,t0+.015);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g).connect(actx.destination);o.start(t0);o.stop(t0+d+.03)}
+function sfx(kind){
+  if(store.mute)return;
+  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();const t=actx.currentTime;
+    if(kind==='ok')[523,659,784,1047].forEach((f,i)=>tone(f,t+i*.07,.2,'triangle',.16));
+    else if(kind==='bad'){tone(260,t,.2,'square',.05);tone(196,t+.13,.3,'square',.05)}
+    else if(kind==='win')[523,659,784,659,784,1047].forEach((f,i)=>tone(f,t+i*.12,.26,'triangle',.16));
+    else if(kind==='tick')tone(1200,t,.05,'sine',.05);
+  }catch(e){}
+}
+
+/* ================= confetti ================= */
+const fx=$('fx'),ctx=fx.getContext('2d');let parts=[],raf=0;
+function sizeFx(){const d=window.devicePixelRatio||1;fx.width=innerWidth*d;fx.height=innerHeight*d;ctx.setTransform(d,0,0,d,0,0)}
+sizeFx();addEventListener('resize',sizeFx);
+function burst(x,y,n){if(reduce)return;for(let i=0;i<n;i++)parts.push({x,y,vx:(Math.random()-.5)*10,vy:-Math.random()*10-3,r:5+Math.random()*6,c:pick(PAL),s:pick(['star','gem','dot']),a:Math.random()*6,va:(Math.random()-.5)*.3,life:1});if(!raf)raf=requestAnimationFrame(tick)}
+function tick(){
+  ctx.clearRect(0,0,innerWidth,innerHeight);
+  for(const p of parts){p.vy+=.32;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;p.life-=.011;ctx.save();ctx.globalAlpha=Math.max(p.life,0);ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.fillStyle=p.c;ctx.beginPath();
+    if(p.s==='dot')ctx.arc(0,0,p.r*.7,0,7);
+    else if(p.s==='gem'){ctx.moveTo(0,-p.r);ctx.lineTo(p.r*.8,0);ctx.lineTo(0,p.r);ctx.lineTo(-p.r*.8,0)}
+    else for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?p.r*.45:p.r;ctx.lineTo(rr*Math.cos(a),rr*Math.sin(a))}
+    ctx.closePath();ctx.fill();ctx.restore()}
+  parts=parts.filter(p=>p.life>0&&p.y<innerHeight+40);raf=parts.length?requestAnimationFrame(tick):0;
+}
+
+/* ================= screens ================= */
+function show(id){['home','play','result'].forEach(s=>$(s).hidden=s!==id);scrollTo({top:0,behavior:reduce?'auto':'smooth'})}
+function renderHome(){
+  const total=LEVELS.reduce((s,L)=>s+(store.best[L.id]||0),0);
+  $('totalStars').innerHTML=starSVG(true,22)+`<span>${ar(total)} / ${ar(LEVELS.length*3)}</span>`;
+  $('muteBtn').innerHTML=store.mute?SPEAKER_OFF:SPEAKER_ON;
+  $('map').innerHTML=LEVELS.map((L,i)=>{const b=store.best[L.id]||0;
+    return `<button class="planet" data-id="${L.id}" aria-label="${L.name}، ${L.desc}، النجوم ${ar(b)} من ٣">${planetSVG(L,i)}<span class="tag">${L.lesson}</span><span class="pname">${L.name}</span><span class="pdesc">${L.desc}</span><span class="stars">${[0,1,2].map(j=>starSVG(j<b)).join('')}</span></button>`}).join('');
+}
+$('map').addEventListener('click',e=>{const b=e.target.closest('.planet');if(b)start(b.dataset.id)});
+$('muteBtn').addEventListener('click',()=>{store.mute=!store.mute;save();renderHome();if(!store.mute)sfx('tick')});
+$('gemIcon').innerHTML=GEM;$('miniRocket').innerHTML=ROCKET;
+
+let S=null,timerId=0;
+const PRAISE=['أحسنت!','رائع!','ممتاز!','إجابة صحيحة!','عبقري!','انطلق أيها البطل!'];
+function start(id){
+  clearInterval(timerId);
+  const L=LEVELS.find(l=>l.id===id);
+  S={L,i:0,correct:0,gems:0,answered:false,qs:L.race?[]:L.gen(),time:60,total:L.race?null:8};
+  $('lvlName').textContent=L.name;$('gemCount').textContent=ar(0);
+  $('timer').hidden=!L.race;
+  if(L.race){updateTimer();timerId=setInterval(()=>{S.time--;updateTimer();if(S.time<=5&&S.time>0)sfx('tick');if(S.time<=0){clearInterval(timerId);finish()}},1000)}
+  show('play');renderQ();
+}
+function updateTimer(){const t=$('timer');t.innerHTML=`<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg><span>${ar(Math.max(S.time,0))} ثانية</span>`;t.classList.toggle('low',S.time<=10);setProgress()}
+function setProgress(){
+  const pct=S.L.race?(1-S.time/60)*100:(S.i/S.total)*100;
+  $('fill').style.width=pct+'%';$('miniRocket').style.insetInlineStart=`calc(${pct}% - 46px)`;
+}
+function renderQ(){
+  const q=S.L.race?raceQ():S.qs[S.i];S.q=q;S.answered=false;
+  $('qnum').textContent=S.L.race?`السؤال ${ar(S.i+1)}`:`السؤال ${ar(S.i+1)} من ${ar(S.total)}`;
+  $('qkind').textContent=q.kind;
+  $('prompt').innerHTML=q.prompt;
+  const vb=$('visBox');vb.innerHTML=q.vis||'';vb.hidden=!q.vis;
+  const hb=$('hintBtn');hb.hidden=!q.hint;hb.innerHTML=BULB+'تلميح: أرني الصورة';
+  $('eqWrap').innerHTML=q.eq||'';$('eqWrap').hidden=!q.eq;
+  const op=$('options');op.innerHTML='';
+  q.options.forEach(o=>{const b=document.createElement('button');b.className='opt'+(o.txt?' txt':'');b.innerHTML=o.label;b.dataset.v=o.value;b.addEventListener('click',()=>choose(b));op.appendChild(b)});
+  $('explain').hidden=true;$('nextBtn').hidden=true;setProgress();
+}
+$('hintBtn').addEventListener('click',()=>{const vb=$('visBox');vb.innerHTML=S.q.hint;vb.hidden=false;$('hintBtn').hidden=true});
+function choose(btn){
+  if(S.answered)return;S.answered=true;
+  const q=S.q,ok=btn.dataset.v===q.answer;
+  document.querySelectorAll('.opt').forEach(b=>{b.disabled=true;if(b.dataset.v===q.answer)b.classList.add('right')});
+  const blank=document.querySelector('#eqWrap .blank');
+  if(blank&&/^\d+$/.test(q.answer)){blank.textContent=ar(q.answer);blank.classList.add('filled')}
+  if(ok){S.correct++;S.gems++;$('gemCount').textContent=ar(S.gems);sfx('ok');const r=btn.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,22)}
+  else{btn.classList.add('wrong');sfx('bad')}
+  if(S.L.race){setTimeout(()=>{if(S.time>0){S.i++;renderQ()}},ok?380:1000);return}
+  const ex=$('explain');ex.className='explain '+(ok?'good':'miss');
+  ex.innerHTML=`<div class="head">${ok?pick(PRAISE):'لا بأس، تأمّل الحل:'}</div>${q.explain||''}`;ex.hidden=false;
+  const nb=$('nextBtn');nb.textContent=S.i<S.total-1?'السؤال التالي':'أنهي الرحلة';nb.hidden=false;nb.focus({preventScroll:true});
+  setTimeout(()=>nb.scrollIntoView({block:'nearest',behavior:reduce?'auto':'smooth'}),60);
+}
+$('nextBtn').addEventListener('click',()=>{S.i++;if(S.i>=S.total)finish();else{renderQ();$('card').scrollIntoView({block:'start',behavior:reduce?'auto':'smooth'})}});
+$('backBtn').addEventListener('click',()=>{clearInterval(timerId);renderHome();show('home')});
+function finish(){
+  clearInterval(timerId);
+  const c=S.correct, stars=S.L.race?(c>=15?3:c>=10?2:c>=5?1:0):(c>=7?3:c>=5?2:c>=3?1:0);
+  if(stars>(store.best[S.L.id]||0)){store.best[S.L.id]=stars;save()}
+  $('bigStars').innerHTML=[0,1,2].map(j=>bigStar(j<stars)).join('');
+  $('resTitle').textContent=['لا تستسلم، التدريب يصنع الأبطال','بداية جيدة! حاول مرة أخرى','أحسنت! اقتربت من القمة','رائع! أنت بطل الضرب'][stars];
+  $('resScore').textContent=S.L.race?`أجبت إجابة صحيحة عن ${ar(c)} من ${ar(S.i+(S.answered?1:0))} سؤالًا في ٦٠ ثانية`:`أجبت إجابة صحيحة عن ${ar(c)} من ${ar(S.total)} أسئلة`;
+  show('result');sfx(stars?'win':'bad');
+  if(stars>=2)setTimeout(()=>{burst(innerWidth*.3,innerHeight*.35,40);burst(innerWidth*.7,innerHeight*.35,40)},250);
+}
+$('againBtn').addEventListener('click',()=>start(S.L.id));
+$('mapBtn').addEventListener('click',()=>{renderHome();show('home')});
+renderHome();
+})();
+</script>
+</body>
+</html>
