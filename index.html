@@ -21,6 +21,7 @@ body{margin:0}
   color-scheme:dark;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{min-height:100%}
 body{
   margin:0; color:#fff; font-family:var(--body); font-size:17px; line-height:1.6;
@@ -241,7 +242,6 @@ footer{margin-top:28px;text-align:center;color:#b9addf;font-size:.9rem}
       <div class="qnum"><span id="qnum"></span><span class="kind" id="qkind"></span></div>
       <div class="prompt" id="prompt"></div>
       <div class="vis-box" id="visBox" hidden></div>
-      <button class="hint" id="hintBtn" hidden></button>
       <div class="eq-wrap" id="eqWrap"></div>
       <div class="options" id="options"></div>
       <div class="explain" id="explain" hidden></div>
@@ -614,13 +614,11 @@ function renderQ(){
   $('qkind').textContent=q.kind;
   $('prompt').innerHTML=q.prompt;
   const vb=$('visBox');vb.innerHTML=q.vis||'';vb.hidden=!q.vis;
-  const hb=$('hintBtn');hb.hidden=!q.hint;hb.innerHTML=BULB+'تلميح: أرني الصورة';
   $('eqWrap').innerHTML=q.eq||'';$('eqWrap').hidden=!q.eq;
   const op=$('options');op.innerHTML='';
   q.options.forEach(o=>{const b=document.createElement('button');b.className='opt'+(o.txt?' txt':'');b.innerHTML=o.label;b.dataset.v=o.value;b.addEventListener('click',()=>choose(b));op.appendChild(b)});
   $('explain').hidden=true;$('nextBtn').hidden=true;setProgress();
 }
-$('hintBtn').addEventListener('click',()=>{const vb=$('visBox');vb.innerHTML=S.q.hint;vb.hidden=false;$('hintBtn').hidden=true});
 function choose(btn){
   if(S.answered)return;S.answered=true;
   const q=S.q,ok=btn.dataset.v===q.answer;
